@@ -190,11 +190,21 @@ RunMixscale = function (object, assay = "PRTB", slot = "scale.data", labels = "g
                         warning(paste("No de.genes are provided for PRTB:", gene, ". Pls check!"))
                     }
                 } else {
-                    # run DE 
-                    de.genes <- Seurat:::TopDEGenesMixscape(object = object, 
-                                                   ident.1 = gd.cells, ident.2 = sub.ntgd.cells, de.assay = de.assay, 
-                                                   logfc.threshold = logfc.threshold, labels = fine.mode.labels, 
-                                                   verbose = verbose, pval.cutoff = pval.cutoff)
+                    # run DE, original Mixscale implementation with bonferroni correction
+                   # de.genes <- Seurat:::TopDEGenesMixscape(object = object, 
+                #                                   ident.1 = gd.cells, ident.2 = sub.ntgd.cells, de.assay = de.assay, 
+                #                                   logfc.threshold = logfc.threshold, labels = fine.mode.labels, 
+                #                                   verbose = verbose, pval.cutoff = pval.cutoff)
+                    topDEgene_results <-TopDEGenes_wilcoxBH(object = object, 
+                                                            ident.1 = gd, 
+                                                            ident.2 = nt.class.name,
+                                                            labels = fine.mode.labels,
+                                                            de.assay = de.assay,
+                                                            padj.cutoff = pval.cutoff,
+                                                            logfc.threshold = logfc.threshold,
+                                                            verbose = verbose)
+                    object <- topDEgene_results$object
+                    de.genes <- topDEgene_results$de.genes
                     all.de.genes <- c(all.de.genes, de.genes)
                 }
             }
@@ -267,10 +277,23 @@ RunMixscale = function (object, assay = "PRTB", slot = "scale.data", labels = "g
                     message(paste("No de.genes are provided for PRTB:", gene, ". Pls check!"))
                 }
             } else {
-                all.de.genes <- Seurat:::TopDEGenesMixscape(object = object, 
-                                                   ident.1 = orig.guide.cells, ident.2 = sub.nt.cells, 
-                                                   de.assay = de.assay, logfc.threshold = logfc.threshold, 
-                                                   labels = labels, verbose = verbose, pval.cutoff = pval.cutoff)
+    
+                topDEgene_results <- TopDEGenes_wilcoxBH(object = object, 
+                                                ident.1 = gene,
+                                                ident.2 =  nt.class.name,
+                                                labels = labels,
+                                                de.assay = de.assay,
+                                                padj.cutoff = pval.cutoff,
+                                                logfc.threshold = logfc.threshold,
+                                                verbose = verbose)
+                
+                object <- topDEgene_results$object
+                all.de.genes <- topDEgene_results$de.genes
+                # original Mixscale implementation with bonferroni correction
+                #all.de.genes <- Seurat:::TopDEGenesMixscape(object = object, 
+                 #                                  ident.1 = orig.guide.cells, ident.2 = sub.nt.cells, 
+                 #                                  de.assay = de.assay, logfc.threshold = logfc.threshold, 
+                 #                                  labels = labels, verbose = verbose, pval.cutoff = pval.cutoff)
             }
             
             
@@ -366,10 +389,13 @@ RunMixscale = function (object, assay = "PRTB", slot = "scale.data", labels = "g
                 vec <- matrixStats::rowMeans2(x = dat[, guide.cells, drop = FALSE]) - 
                     matrixStats::rowMeans2(x = dat[, nt.cells, drop = FALSE])
                 
+                
+                
                 # save the mat and vec to easily calculate the weights by rowSums
                 pvec_mat = sweep(t(dat), MARGIN=2, vec, `*`) 
                 vec_mat = vec * vec
                 names(vec_mat) = colnames(pvec_mat)
+                
                 
                 # the weights 
                 pvec = matrixStats::rowSums2(pvec_mat)/sum(vec_mat)
@@ -455,8 +481,11 @@ RunMixscale = function (object, assay = "PRTB", slot = "scale.data", labels = "g
                 # calculate the mean and sd of the PRTB score for the NT cells
                 mean_NT = mean(tmp$pvec[idx_NT], na.rm = T)
                 sd_NT = sd(tmp$pvec[idx_NT], na.rm = T)
+               
+                
                 # standardize the PRTB scores for the PRTBed cells based on the mean and SD from those of the NT cells
                 std_weight_gene = (tmp$pvec[idx_gene] - mean_NT)/sd_NT
+                #print(std_weight_gene)
                 # convert those negative standardised PRTB score to 0
                 # std_weight_gene[which(std_weight_gene < 0)] = 0
                 
@@ -487,6 +516,7 @@ RunMixscale = function (object, assay = "PRTB", slot = "scale.data", labels = "g
     
     # some final editing
     all_score = all_score[!duplicated(all_score$cell_label), ]
+    
     rownames(all_score) = all_score$cell_label
     all_score = all_score[, "weight", drop = FALSE]
     names(all_score) = new.class.name
