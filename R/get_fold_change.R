@@ -31,7 +31,7 @@ get_fc = function(gene_exp = NULL, idx_P = NULL, idx_NT = NULL,
                   min.cells = 3,  
                   thresh.min = 0, 
                   pseudocount.use = 1,  
-                  min.pct = 0.1,  
+                  min.pct = 0.001,  #changed from 0.1
                   base = 2, 
                   norm.method = 'raw'
 ){
@@ -62,6 +62,7 @@ get_fc = function(gene_exp = NULL, idx_P = NULL, idx_NT = NULL,
     )
     
     if (pct.1 < min.pct & pct.2 < min.pct) {
+        print("HERE")
         return(NA)
     } 
     
@@ -94,7 +95,7 @@ get_idx = function(gene_exp = NULL, idx_P = NULL, idx_NT = NULL,
                    min.cells = 3,  # the minimum cell threshold to perform DE
                    thresh.min = 0, # the minimum expression level
                    pseudocount.use = 1,  
-                   min.pct = 0.1,  
+                   min.pct = 0.001,  #changed from 0.1
                    logfc.threshold = 0.1,
                    base = 2, 
                    norm.method = 'raw'

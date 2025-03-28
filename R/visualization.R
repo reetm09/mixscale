@@ -302,7 +302,7 @@ Mixscale_ScatterPlot = function(object = NULL,
 #' 
 
 Mixscale_DoHeatmap = function(object = NULL, 
-                              assay = "RNA", 
+                              assay = "rna", #REET Addition
                               slot = "data",
                               labels = "gene", 
                               nt.class.name = "NT", 

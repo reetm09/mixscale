@@ -49,7 +49,7 @@ NULL
 #' @concept perturbation_scoring
 
 Run_wmvRegDE = function (object, 
-                         assay = "RNA", 
+                         assay = "rna", 
                          slot = "counts", 
                          labels = "gene", 
                          nt.class.name = "NT", 
@@ -95,7 +95,8 @@ Run_wmvRegDE = function (object,
     all_PRTB_list = sort(unique(object[[labels]][,1]))
     all_PRTB_list = all_PRTB_list[all_PRTB_list != nt.class.name]
     wt_PRTB_list = wt_PRTB_list[wt_PRTB_list %in% all_PRTB_list]
-    DefaultAssay(object) = "RNA"
+    #DefaultAssay(object) = "RNA"
+    DefaultAssay(object) = assay
     
     if(!is.null(PRTB_list)){
         wt_PRTB_list = intersect(wt_PRTB_list, PRTB_list)
@@ -220,7 +221,9 @@ Run_wmvRegDE = function (object,
         # idx_NT = match(mat_all$cell_label[mat_all$gene == "NT"], colnames(count_data2))
         # idx_P = match(mat_all$cell_label[mat_all$gene != "NT"], colnames(count_data2))
         
-        count_data2 = GetAssayData(object = object[['RNA']], slot = "counts")[, idx]
+        #REET ADDITION
+        #count_data2 = GetAssayData(object = object[['RNA']], slot = "counts")[, idx]
+        count_data2 = GetAssayData(object = object[[assay]], slot = "counts")[, idx]
         # count_data_std2 = GetAssayData(object = object[['RNA']], slot = "data")[, idx]
         
         # here we will calculate the logfc within each cell type. 
@@ -630,7 +633,11 @@ Run_stdDE = function (object,
         # idx_NT = match(mat_all$cell_label[mat_all$gene == "NT"], colnames(count_data2))
         # idx_P = match(mat_all$cell_label[mat_all$gene != "NT"], colnames(count_data2))
         
-        count_data2 = GetAssayData(object = object[['RNA']], slot = "counts")[, idx]
+        # REET ADDITION
+        #count_data2 = GetAssayData(object = object[['RNA']], slot = "counts")[, idx]
+        count_data2 = GetAssayData(object = object[[assay]], slot = "counts")[, idx]
+        
+        
         # count_data_std2 = GetAssayData(object = object[['RNA']], slot = "data")[, idx]
         
         # here we will calculate the logfc within each cell type. 
