@@ -1,7 +1,7 @@
-Package: Mixscale_BH 
+Package: MixscaleBH 
 Type: Package
 Title: Quantify the perturbation heterogeneity in Perturb-seq 
-Version: 0.3.0
+Version: 0.3.1
 RoxygenNote: 7.2.3
 Collate: 
     'decomposition.R'
